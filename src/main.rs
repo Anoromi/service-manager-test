@@ -69,20 +69,21 @@ fn main() {
     // }
 
     if args().any(|v| v == "--some-arg") {
-        let mut f = File::options()
-            .create(true)
-            .truncate(true)
-            .write(true)
-            .read(true)
-            .open("C:\\Users\\Andrii\\.vscode\\code\\hehe.txt")
-            // .open("/home/anoromi/code/rust/service-manager-test/test.txt")
-            .unwrap();
+        // let mut f = File::options()
+        //     .create(true)
+        //     .truncate(true)
+        //     .write(true)
+        //     .read(true)
+        //     .open("C:\\Users\\Andrii\\.vscode\\code\\hehe.txt")
+        //     // .open("/home/anoromi/code/rust/service-manager-test/test.txt")
+        //     .unwrap();
         loop {
-            f.write_all(env::current_dir().unwrap().as_os_str().as_encoded_bytes())
-                .unwrap();
-            // f.write_all(format!("{}", time::SystemTime::now()).as_bytes())
+          println!("Hello there");
+            // f.write_all(env::current_dir().unwrap().as_os_str().as_encoded_bytes())
             //     .unwrap();
-            f.write_all(b"\n").unwrap();
+            // // f.write_all(format!("{}", time::SystemTime::now()).as_bytes())
+            // //     .unwrap();
+            // f.write_all(b"\n").unwrap();
             sleep(Duration::from_secs(2));
         }
     }
