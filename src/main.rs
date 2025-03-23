@@ -92,7 +92,8 @@ fn main() {
     // }
 
     if args().any(|v| v == "--some-arg") {
-        service_dispatcher::start("com.example.whatawhat.hehe", ffi_service_main).unwrap();
+        service_dispatcher::start("com.cotton.cotton", ffi_service_main).unwrap();
+        // service_dispatcher::start("com.example.whatawhat.hehe", ffi_service_main).unwrap();
     }
 
     // Get generic service by detecting what is available on the platform
