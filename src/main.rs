@@ -105,7 +105,7 @@ fn main() {
         .install(ServiceInstallCtx {
             label: label.clone(),
             program: exe,
-            args: vec![OsString::from("--some-arg --force")],
+            args: vec![OsString::from("--some-arg")],
             contents: None, // Optional String for system-specific service content.
             username: None, // Optional String for alternative user to run service.
             working_directory: None, // Optional String for the working directory for the service process.
