@@ -16,9 +16,16 @@ use service_manager::{
     ServiceUninstallCtx,
 };
 use windows::{
-    core::{PCSTR, PCWSTR}, Win32::{
-        self, Foundation::HWND, System::Console::AllocConsole, UI::{Shell::{ShellExecuteA, ShellExecuteW}, WindowsAndMessaging::SW_SHOW}
-    }
+    Win32::{
+        self,
+        Foundation::HWND,
+        System::Console::AllocConsole,
+        UI::{
+            Shell::{ShellExecuteA, ShellExecuteW},
+            WindowsAndMessaging::SW_SHOW,
+        },
+    },
+    core::{PCSTR, PCWSTR},
 };
 
 fn main() {
@@ -26,47 +33,49 @@ fn main() {
     let exe = env::current_exe().unwrap();
     let label: ServiceLabel = "com.example.whatawhat.hehe".parse().unwrap();
 
-    #[cfg(windows)]
-    {
-        let exe: String = std::env::current_exe()
-            .unwrap()
-            .as_os_str()
-            .to_os_string()
-            .into_string()
-            .expect("Couldn't unwrap the string");
-        let exe = format!("{} --force", exe);
-        println!("{}", exe);
-        // let b = exe.encode_utf16().collect::<Vec<_>>();
-        let b = exe.as_ptr();
-
-        if args().all(|v| v != "--force") {
-            let v = unsafe {
-                ShellExecuteA(
-                    std::mem::zeroed(),
-                    // PCSTR::from_raw("runas\0".encode_utf16().collect::<Vec<_>>().as_ptr()),
-                    // PCSTR::from_raw(b.as_ptr()),
-                    PCSTR::from_raw(b"runas\0".as_ptr()),
-                    PCSTR::from_raw(b),
-                    PCSTR::null(),
-                    PCSTR::null(),
-                    SW_SHOW,
-                )
-            };
-            println!("Invalid {}", v.is_invalid());
-            return;
-        }
-    }
+    // #[cfg(windows)]
+    // {
+    //     let exe: String = std::env::current_exe()
+    //         .unwrap()
+    //         .as_os_str()
+    //         .to_os_string()
+    //         .into_string()
+    //         .expect("Couldn't unwrap the string");
+    //     let exe = format!("{} --force", exe);
+    //     println!("{}", exe);
+    //     // let b = exe.encode_utf16().collect::<Vec<_>>();
+    //     let b = exe.as_ptr();
+    //
+    //     if args().all(|v| v != "--force") {
+    //         let v = unsafe {
+    //             ShellExecuteA(
+    //                 std::mem::zeroed(),
+    //                 // PCSTR::from_raw("runas\0".encode_utf16().collect::<Vec<_>>().as_ptr()),
+    //                 // PCSTR::from_raw(b.as_ptr()),
+    //                 PCSTR::from_raw(b"runas\0".as_ptr()),
+    //                 PCSTR::from_raw(b),
+    //                 PCSTR::null(),
+    //                 PCSTR::null(),
+    //                 SW_SHOW,
+    //             )
+    //         };
+    //         println!("Invalid {}", v.is_invalid());
+    //         return;
+    //     }
+    // }
+    // #[cfg(windows)]
+    // {
+    //     unsafe { AllocConsole() }.unwrap()
+    // }
 
     if args().any(|v| v == "--some-arg") {
-        #[cfg(windows)] {
-          unsafe { AllocConsole() }.unwrap()
-        }
         let mut f = File::options()
             .create(true)
             .truncate(true)
             .write(true)
             .read(true)
-            .open("/home/anoromi/code/rust/service-manager-test/test.txt")
+            .open("C:\\Users\\Andrii\\.vscode\\code\\hehe.txt")
+            // .open("/home/anoromi/code/rust/service-manager-test/test.txt")
             .unwrap();
         loop {
             f.write_all(env::current_dir().unwrap().as_os_str().as_encoded_bytes())
@@ -106,11 +115,12 @@ fn main() {
         .expect("Failed to install");
 
     // Start our service using the underlying service management platform
-    // manager
-    //     .start(ServiceStartCtx {
-    //         label: label.clone(),
-    //     })
-    //     .expect("Failed to start");
+    manager
+        .start(ServiceStartCtx {
+            label: label.clone(),
+        })
+        .expect("Failed to start");
+    sleep(Duration::from_secs(4));
 
     // Stop our service using the underlying service management platform
     // manager
@@ -120,9 +130,9 @@ fn main() {
     //     .expect("Failed to stop");
 
     // Uninstall our service using the underlying service management platform
-    manager
-        .uninstall(ServiceUninstallCtx {
-            label: label.clone(),
-        })
-        .expect("Failed to stop");
+    // manager
+    //     .uninstall(ServiceUninstallCtx {
+    //         label: label.clone(),
+    //     })
+    //     .expect("Failed to stop");
 }
