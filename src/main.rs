@@ -16,12 +16,11 @@ use service_manager::{
     ServiceUninstallCtx,
 };
 use windows::{
-    Win32::{
+    core::{PCSTR, PCWSTR}, Win32::{
         self,
         Foundation::HWND,
-        UI::{Shell::ShellExecuteW, WindowsAndMessaging::SW_SHOW},
-    },
-    core::{PCSTR, PCWSTR},
+        UI::{Shell::{ShellExecuteA, ShellExecuteW}, WindowsAndMessaging::SW_SHOW},
+    }
 };
 
 fn main() {
@@ -37,16 +36,20 @@ fn main() {
             .to_os_string()
             .into_string()
             .expect("Couldn't unwrap the string");
-        let b = exe.encode_utf16().collect::<Vec<_>>();
+        let exe = format!("{} --force", exe);
+        // let b = exe.encode_utf16().collect::<Vec<_>>();
+        let b = exe.as_ptr();
 
-        if args().any(|v| v != "--force") {
+        if args().all(|v| v != "--force") {
             let v = unsafe {
-                ShellExecuteW(
+                ShellExecuteA(
                     std::mem::zeroed(),
-                    PCWSTR::from_raw("runas\0".encode_utf16().collect::<Vec<_>>().as_ptr()),
-                    PCWSTR::from_raw(b.as_ptr()),
-                    PCWSTR::null(),
-                    PCWSTR::null(),
+                    // PCSTR::from_raw("runas\0".encode_utf16().collect::<Vec<_>>().as_ptr()),
+                    // PCSTR::from_raw(b.as_ptr()),
+                    PCSTR::from_raw(b"runas\0".as_ptr()),
+                    PCSTR::from_raw(b),
+                    PCSTR::null(),
+                    PCSTR::null(),
                     SW_SHOW,
                 )
             };
@@ -55,7 +58,7 @@ fn main() {
         }
     }
 
-    if args().len() > 1 {
+    if args().all(|v| v != "--some-arg") {
         let mut f = File::options()
             .create(true)
             .truncate(true)
@@ -90,7 +93,7 @@ fn main() {
         .install(ServiceInstallCtx {
             label: label.clone(),
             program: exe,
-            args: vec![OsString::from("--some-arg")],
+            args: vec![OsString::from("--some-arg --force")],
             contents: None, // Optional String for system-specific service content.
             username: None, // Optional String for alternative user to run service.
             working_directory: None, // Optional String for the working directory for the service process.
