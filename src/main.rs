@@ -17,9 +17,7 @@ use service_manager::{
 };
 use windows::{
     core::{PCSTR, PCWSTR}, Win32::{
-        self,
-        Foundation::HWND,
-        UI::{Shell::{ShellExecuteA, ShellExecuteW}, WindowsAndMessaging::SW_SHOW},
+        self, Foundation::HWND, System::Console::AllocConsole, UI::{Shell::{ShellExecuteA, ShellExecuteW}, WindowsAndMessaging::SW_SHOW}
     }
 };
 
@@ -37,6 +35,7 @@ fn main() {
             .into_string()
             .expect("Couldn't unwrap the string");
         let exe = format!("{} --force", exe);
+        println!("{}", exe);
         // let b = exe.encode_utf16().collect::<Vec<_>>();
         let b = exe.as_ptr();
 
@@ -58,7 +57,10 @@ fn main() {
         }
     }
 
-    if args().all(|v| v != "--some-arg") {
+    if args().any(|v| v == "--some-arg") {
+        #[cfg(windows)] {
+          unsafe { AllocConsole() }.unwrap()
+        }
         let mut f = File::options()
             .create(true)
             .truncate(true)
