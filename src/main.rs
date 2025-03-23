@@ -27,6 +27,29 @@ use windows::{
     },
     core::{PCSTR, PCWSTR},
 };
+use windows_service::{define_windows_service, service_dispatcher};
+
+define_windows_service!(ffi_service_main, my_service_main);
+
+fn my_service_main(arguments: Vec<OsString>) {
+    let mut f = File::options()
+        .create(true)
+        .truncate(true)
+        .write(true)
+        .read(true)
+        .open("C:\\Users\\Andrii\\.vscode\\code\\hehe.txt")
+        // .open("/home/anoromi/code/rust/service-manager-test/test.txt")
+        .unwrap();
+    loop {
+        // println!("Hello there");
+        f.write_all(env::current_dir().unwrap().as_os_str().as_encoded_bytes())
+            .unwrap();
+        // f.write_all(format!("{}", time::SystemTime::now()).as_bytes())
+        //     .unwrap();
+        f.write_all(b"\n").unwrap();
+        sleep(Duration::from_secs(2));
+    }
+}
 
 fn main() {
     // Create a label for our service
@@ -69,23 +92,7 @@ fn main() {
     // }
 
     if args().any(|v| v == "--some-arg") {
-        let mut f = File::options()
-            .create(true)
-            .truncate(true)
-            .write(true)
-            .read(true)
-            .open("C:\\Users\\Andrii\\.vscode\\code\\hehe.txt")
-            // .open("/home/anoromi/code/rust/service-manager-test/test.txt")
-            .unwrap();
-        loop {
-          // println!("Hello there");
-            f.write_all(env::current_dir().unwrap().as_os_str().as_encoded_bytes())
-                .unwrap();
-            // f.write_all(format!("{}", time::SystemTime::now()).as_bytes())
-            //     .unwrap();
-            f.write_all(b"\n").unwrap();
-            sleep(Duration::from_secs(2));
-        }
+        service_dispatcher::start("com.example.whatawhat.hehe", ffi_service_main).unwrap();
     }
 
     // Get generic service by detecting what is available on the platform
