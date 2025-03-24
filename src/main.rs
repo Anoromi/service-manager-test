@@ -11,9 +11,9 @@ use std::{
     time::{self, Duration, Instant},
 };
 
+use anyhow::Result;
 use service_manager::{
-    ServiceInstallCtx, ServiceLabel, ServiceLevel, ServiceManager, ServiceStartCtx, ServiceStopCtx,
-    ServiceUninstallCtx,
+    ServiceInstallCtx, ServiceLabel, ServiceLevel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx
 };
 use windows::{
     Win32::{
@@ -27,11 +27,36 @@ use windows::{
     },
     core::{PCSTR, PCWSTR},
 };
-use windows_service::{define_windows_service, service_dispatcher};
+use windows_service::{define_windows_service, service::{ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceType}, service_control_handler::{self, ServiceControlHandlerResult}, service_dispatcher};
 
 define_windows_service!(ffi_service_main, my_service_main);
 
-fn my_service_main(arguments: Vec<OsString>) {
+fn my_service_main(arguments: Vec<OsString>) -> Result<()> {
+    let event_handler = move |control_event| -> ServiceControlHandlerResult {
+        match control_event {
+            ServiceControl::Stop => {
+                // Handle stop event and return control back to the system.
+                // std::process::exit(1);
+                ServiceControlHandlerResult::NoError
+            }
+            // All services must accept Interrogate even if it's a no-op.
+            ServiceControl::Interrogate => ServiceControlHandlerResult::NoError,
+            _ => ServiceControlHandlerResult::NotImplemented,
+        }
+    };
+
+    let status_handle = service_control_handler::register("myservice", event_handler)?;
+
+    status_handle.set_service_status(windows_service::service::ServiceStatus {
+        service_type: ServiceType::OWN_PROCESS,
+        current_state: windows_service::service::ServiceState::Running,
+        controls_accepted: ServiceControlAccept::STOP,
+        exit_code: ServiceExitCode::NO_ERROR,
+        checkpoint: 0,
+        wait_hint: Duration::default(),
+        process_id: None,
+    })?;
+
     let mut f = File::options()
         .create(true)
         .truncate(true)
